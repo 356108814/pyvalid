@@ -93,8 +93,7 @@ class ValidateForm(Validate):
         min_value = 0
         max_value = 65535
         if rule_name:
-            # TODO 完全匹配
-            range_l = re.findall('(\w*)\[(\d+[ ]?,[ ]?\d+)\]', rule_name)
+            range_l = re.findall('^(\w*)\[(\d+[ ]?,[ ]?\d+)\]$', rule_name)
             if range_l:
                 rule_name = range_l[0][0]
                 range_a = range_l[0][1].split(',')
