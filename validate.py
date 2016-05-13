@@ -1,5 +1,11 @@
 # encoding: utf-8
 
+"""
+验证
+@author Yuriseus
+@create 2016-5-13 14:59
+"""
+
 from validtype import *
 
 
@@ -83,7 +89,7 @@ class ValidateForm(Validate):
                 # 解析值范围
                 rule_name, min_value, max_value = self.parse_rule_range(rule_name)
                 rule_dict = {'name': rule_name, 'value': {'min_value': min_value, 'max_value': max_value}}
-                is_valid = super().is_valid(value, rule_dict)
+                is_valid = super(ValidateForm, self).is_valid(value, rule_dict)
                 if not is_valid:
                     rtn_is_valid = False
                     self.__error_dict[key] = self.get_error_msg(rule_name)
@@ -93,10 +99,10 @@ class ValidateForm(Validate):
         min_value = 0
         max_value = 65535
         if rule_name:
-            range_l = re.findall('^(\w*)\[(\d+[ ]?,[ ]?\d+)\]$', rule_name)
+            range_l = re.findall('^(\w*)\[(\d+[ ]?:[ ]?\d+)\]$', rule_name)
             if range_l:
                 rule_name = range_l[0][0]
-                range_a = range_l[0][1].split(',')
+                range_a = range_l[0][1].split(':')
                 min_value = int(range_a[0])
                 max_value = int(range_a[1])
         return rule_name, min_value, max_value
@@ -104,7 +110,7 @@ class ValidateForm(Validate):
 
 if __name__ == '__main__':
     form = ValidateForm()
-    print(form.parse_rule_range('string[10, 20]'))
+    print(form.parse_rule_range('string[10:20]'))
 
 
 
