@@ -91,6 +91,41 @@ class ValidateForm(Validate):
         return rtn_is_valid, self._error_dict
 
 
+validate_form = ValidateForm()
+
+
+def valid(cfg, is_body_arg=False):
+    """
+    数据验证器，在handler层，在service不再验证参数
+    示例：@valid(cfg={'age': 'int'})
+    @param cfg验证配置,dict类型
+    @param is_body_arg 是否为请求体参数
+    """
+    def handle_func(func):
+        def wrapper(*args, **kwargs):
+            if not cfg:
+                pass
+            else:
+                request_handler = None
+                for index, arg in enumerate(args):
+                    if index == 0:    # 第一个参数为类对象
+                        request_handler = arg
+                param_dict = {}
+                for param_name in cfg:
+                    if is_body_arg:
+                        # Tornado
+                        param_dict[param_name] = request_handler.get_body_argument(param_name, None)
+                    else:
+                        param_dict[param_name] = request_handler.get_argument(param_name, None)
+                is_valid, error_msg = validate_form.is_valid(param_dict, cfg)
+                if is_valid:
+                    return func(*args, **kwargs)
+                else:
+                    return False
+        return wrapper
+    return handle_func
+
+
 if __name__ == '__main__':
     form = ValidateForm()
 

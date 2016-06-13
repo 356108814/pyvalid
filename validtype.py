@@ -28,6 +28,8 @@ class Regular(object):
         @return True验证通过，False验证失败
         """
         self.rule_config = rule_config
+        if not self.rule_config.required and not value:    # 非必须参数，而且未传值，直接返回True
+            return True
         is_valid = self.valid_required(value)
         if is_valid:
             is_valid = self.valid_pattern(value)
@@ -42,7 +44,11 @@ class Regular(object):
         return True
 
     def valid_pattern(self, value):
-        return re.compile(self.pattern).match(str(value)) is not None
+        is_match = re.compile(self.pattern).match(str(value)) is not None
+        if not is_match:
+            # self.error_msg = u'为必选项，不能为空'
+            pass
+        return is_match
 
     def valid_range(self, value):
         """验证数值范围"""
@@ -63,23 +69,33 @@ class Regular(object):
             return False
         return True
 
+    def reset(self):
+        pass
+
 
 class Int(Regular):
     """整数"""
     def __init__(self):
-        super(Int, self).__init__('^[-]?[0-9]+$', u'只能输入整数')
+        super(Int, self).__init__('^[-]?[0-9]+$')
+        self.reset()
+
+    def reset(self):
+        self.error_msg = u'只能输入整数'
 
 
 class Number(Regular):
     """数字"""
     def __init__(self):
-        super(Number, self).__init__('^[-]?[0-9]+[.]?[0-9]+$', u'只能输入数字')
+        super(Number, self).__init__('^[-]?[0-9]+[.]?[0-9]+$')
+
+    def reset(self):
+        self.error_msg = u'只能输入数字'
 
 
 class String(Regular):
     """指定长度字符串"""
     def __init__(self):
-        super(String, self).__init__('', u'字符串长度必须介于{0}到{1}之间')
+        super(String, self).__init__('')
 
     def valid_range(self, value):
         length = 0
@@ -87,33 +103,47 @@ class String(Regular):
             length = len(value)
         return super(String, self).valid_range(length)
 
+    def reset(self):
+        self.error_msg = u'字符串长度必须介于{0}到{1}之间'
+
 
 class Email(Regular):
     """邮箱"""
     def __init__(self):
-        super(Email, self).__init__('^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]+$', u'邮箱格式不正确')
+        super(Email, self).__init__('^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]+$')
+
+    def reset(self):
+        self.error_msg = u'邮箱格式不正确'
 
 
 class Mobile(Regular):
     """手机号"""
     def __init__(self):
-        super(Mobile, self).__init__('^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|171|18[0|1|2|3|5|6|7|8|9])\d{8}$',
-                                     u'手机号格式不正确')
+        super(Mobile, self).__init__('^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|171|18[0|1|2|3|5|6|7|8|9])\d{8}$')
+
+    def reset(self):
+        self.error_msg = u'手机号格式不正确'
 
 
 class Phone(Regular):
     """电话号码"""
     def __init__(self):
-        super(Phone, self).__init__('^\d{3}[-]?\d{8}|\d{4}[-]?\d{7}$', u'电话号码格式不正确')
+        super(Phone, self).__init__('^\d{3}[-]?\d{8}|\d{4}[-]?\d{7}$')
+
+    def reset(self):
+        self.error_msg = u'电话号码格式不正确'
 
 
 class Url(Regular):
     """网址"""
     def __init__(self):
-        super(Url, self).__init__('^(\w+:\/\/)?\w+(\.\w+)+.*$', u'url格式不正确')
+        super(Url, self).__init__('^(\w+:\/\/)?\w+(\.\w+)+.*$')
 
     def valid_range(self, value):
         return super(Url, self).valid_range(len(value))
+
+    def reset(self):
+        self.error_msg = u'url格式不正确'
 
 
 
